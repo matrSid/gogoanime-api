@@ -1,28 +1,21 @@
 
 
-## Installation
-
-
-```bash
-pip install -r requirements.txt
-```
-
 GogoAnime API
 
 This is a RESTful API built with FastAPI that scrapes data from an anime website to provide information about anime series and seasons. It provides several endpoints for searching for anime, retrieving information about specific anime, and getting information about the latest season of anime releases.
 Installation
 
-    Clone this repository: git clone https://github.com/your_username/anime-scraper-api.git
-    Navigate to the project directory: cd anime-scraper-api
+    Clone this repository: git clone 
+    Navigate to the project directory: cd gogoanime-api
     Install the required dependencies: pip install -r requirements.txt
 
 Usage
 
 To start the server, run the following command in your terminal:
 
-lua
-
+```
 uvicorn app:app --reload
+```
 
 This will start the server on http://localhost:8000.
 Endpoints
