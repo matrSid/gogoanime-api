@@ -4,6 +4,9 @@
 
 This is a web scraper written using FastAPI and Python. It can be used to search and retrieve information related to Anime from the GogoAnime website.
 
+The web scraper can be used by making HTTP requests to the various endpoints/routes. Each endpoint accepts different parameters, depending on the action it performs.
+
+
 
 ## Requirements
 
@@ -11,9 +14,6 @@ This is a web scraper written using FastAPI and Python. It can be used to search
 
 - FastAPI
 
-## Usage
-
-The web scraper can be used by making HTTP requests to the various endpoints/routes. Each endpoint accepts different parameters, depending on the action it performs.
 
 # Endpoints
 
