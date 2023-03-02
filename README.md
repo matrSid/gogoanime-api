@@ -14,6 +14,8 @@ The web scraper can be used by making HTTP requests to the various endpoints/rou
 
 - FastAPI
 
+- uvicorn 
+
 
 # Endpoints
 
