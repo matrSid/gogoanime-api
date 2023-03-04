@@ -1,12 +1,8 @@
-
-
 # GogoAnime API
 
 This is a web scraper written using FastAPI and Python. It can be used to search and retrieve information related to Anime from the GogoAnime website.
 
 The web scraper can be used by making HTTP requests to the various endpoints/routes. Each endpoint accepts different parameters, depending on the action it performs.
-
-
 
 ## Requirements
 
@@ -14,11 +10,9 @@ The web scraper can be used by making HTTP requests to the various endpoints/rou
 
 - FastAPI
 
-- uvicorn 
-
+- uvicorn
 
 # Endpoints
-
 
 - **/search/{query}** - Search for Anime by title
 
@@ -30,14 +24,16 @@ The web scraper can be used by making HTTP requests to the various endpoints/rou
 
 - **/home/{page}** - Get a list of Anime from popular lists
 
-
-
+- **/download/{anime_id}/{episode_no}** - Get a list of Anime download links from particular episode
 
 ## Installation
 
-
 ```bash
 pip install -r requirements.txt
+```
+
+```bash
+playwright install chromium
 ```
 
 ## Usage
@@ -45,4 +41,5 @@ pip install -r requirements.txt
 ```bash
 uvicorn main:app --reload
 ```
+
 ## And Then Go to http://127.0.0.1:8000 for docs

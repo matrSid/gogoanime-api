@@ -1,15 +1,52 @@
+# non async version
+
+from functools import cache
+import time
 import httpx
 from selectolax.parser import HTMLParser
 from contextlib import suppress
+from playwright.sync_api import sync_playwright
 
+# from functools import cache
 
 BASE_URL = "https://www2.gogoanimes.fi"
+
+
+def get_js_render(url: str) -> None:
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=True)
+        context = browser.new_context()
+        page = context.new_page()
+        page.goto(url)
+        time.sleep(5)
+        # page.wait_for_selector(".dowload a", timeout=10)
+        content = page.content()
+        context.close()
+        browser.close()
+        return content
 
 
 def html_parser(html: str) -> HTMLParser:
     return HTMLParser(html)
 
 
+@cache
+def get_download_links(anime_id: str, episode_no: int) -> str:
+    response = httpx.get(f"{BASE_URL}/{anime_id}-episode-{episode_no}")
+    parser = html_parser(response.content)
+    download_page_url = parser.css_first(".dowloads a").attributes["href"]
+    print(download_page_url)
+    html_content = get_js_render(download_page_url)
+    parser = html_parser(html_content)
+    data = []
+    for a in parser.css(".dowload a"):
+        name = a.text().strip().replace("\n", "")
+        name = " ".join(list(name.split()))
+        data.append({"name": name, "link": a.attributes["href"]})
+    return data
+
+
+@cache
 def search(query: str) -> list[dict]:  # sourcery skip: avoid-builtin-shadow
     response = httpx.get(f"{BASE_URL}/search.html?keyword={query}")
     parser = html_parser(response.content)
@@ -34,6 +71,7 @@ def search(query: str) -> list[dict]:  # sourcery skip: avoid-builtin-shadow
     return anime_list
 
 
+@cache
 def get_anime(anime_id: str) -> dict:
     response = httpx.get(f"{BASE_URL}/category/{anime_id}")
     parser = html_parser(response.content)
@@ -47,6 +85,7 @@ def get_anime(anime_id: str) -> dict:
     return {"name": name, "img": img_url, "about": about, "episodes": episodes}
 
 
+@cache
 def new_season(page_no: int) -> list[dict]:  # sourcery skip: avoid-builtin-shadow
     anime_list = []
     response = httpx.get(f"{BASE_URL}/new-season.html?page={page_no}")
@@ -61,12 +100,14 @@ def new_season(page_no: int) -> list[dict]:  # sourcery skip: avoid-builtin-shad
     return anime_list
 
 
+@cache
 def get_streaming_link(anime_id: str, episode_no: int) -> str:
     response = httpx.get(f"{BASE_URL}/{anime_id}-episode-{episode_no}")
     parser = html_parser(response.content)
     return f'https:{parser.css_first(".play-video > iframe").attributes["src"]}'
 
 
+@cache
 def home(page: int):
     response = httpx.get(
         f"https://ajax.gogo-load.com/ajax/page-recent-release.html?page={page}"

@@ -1,3 +1,4 @@
+# non async version
 from fastapi import FastAPI
 import scraper
 from fastapi.responses import RedirectResponse
@@ -28,6 +29,11 @@ def get_new_season(page_no: int):
 @app.get("/streaming-link/{anime_id}/{episode_no}")
 def get_streaming(anime_id: str, episode_no: int):
     return scraper.get_streaming_link(anime_id, episode_no)
+
+
+@app.get("/download/{anime_id}/{episode_no}")
+def get_download(anime_id: str, episode_no: int):
+    return scraper.get_download_links(anime_id, episode_no)
 
 
 @app.get("/home/{page}")
