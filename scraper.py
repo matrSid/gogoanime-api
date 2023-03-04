@@ -1,7 +1,7 @@
 # non async version
 
-from functools import cache
 import time
+from functools import cache
 import httpx
 from selectolax.parser import HTMLParser
 from contextlib import suppress
