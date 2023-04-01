@@ -1,7 +1,6 @@
 # non async version
 
 import time
-from functools import cache
 import httpx
 from selectolax.parser import HTMLParser
 from contextlib import suppress
@@ -30,7 +29,6 @@ def html_parser(html: str) -> HTMLParser:
     return HTMLParser(html)
 
 
-@cache
 def get_download_links(anime_id: str, episode_no: int) -> str:
     response = httpx.get(f"{BASE_URL}/{anime_id}-episode-{episode_no}")
     parser = html_parser(response.content)
@@ -46,7 +44,6 @@ def get_download_links(anime_id: str, episode_no: int) -> str:
     return data
 
 
-@cache
 def search(query: str) -> list[dict]:  # sourcery skip: avoid-builtin-shadow
     response = httpx.get(f"{BASE_URL}/search.html?keyword={query}")
     parser = html_parser(response.content)
@@ -71,7 +68,6 @@ def search(query: str) -> list[dict]:  # sourcery skip: avoid-builtin-shadow
     return anime_list
 
 
-@cache
 def get_anime(anime_id: str) -> dict:
     response = httpx.get(f"{BASE_URL}/category/{anime_id}")
     parser = html_parser(response.content)
@@ -85,7 +81,6 @@ def get_anime(anime_id: str) -> dict:
     return {"name": name, "img": img_url, "about": about, "episodes": episodes}
 
 
-@cache
 def new_season(page_no: int) -> list[dict]:  # sourcery skip: avoid-builtin-shadow
     anime_list = []
     response = httpx.get(f"{BASE_URL}/new-season.html?page={page_no}")
@@ -100,14 +95,12 @@ def new_season(page_no: int) -> list[dict]:  # sourcery skip: avoid-builtin-shad
     return anime_list
 
 
-@cache
 def get_streaming_link(anime_id: str, episode_no: int) -> str:
     response = httpx.get(f"{BASE_URL}/{anime_id}-episode-{episode_no}")
     parser = html_parser(response.content)
     return f'https:{parser.css_first(".play-video > iframe").attributes["src"]}'
 
 
-@cache
 def home(page: int):
     response = httpx.get(
         f"https://ajax.gogo-load.com/ajax/page-recent-release.html?page={page}"
