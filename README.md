@@ -20,7 +20,7 @@ The web scraper can be used by making HTTP requests to the various endpoints/rou
 
 - **/new-season/{page_no}** - Get a list of Anime from the latest season
 
-- **/streaming-link/{anime_id}/{episode_no}** - Get streaming link for a particular episode
+- **/streaming-links/{anime_id}/{episode_no}** - Get streaming links for a particular episode
 
 - **/home/{page}** - Get a list of Anime from popular lists
 
