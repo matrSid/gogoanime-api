@@ -1,51 +1,31 @@
-# non async version
-
-import time
 import httpx
 from selectolax.parser import HTMLParser
 from contextlib import suppress
-from playwright.sync_api import sync_playwright
+from requests_cache import CachedSession, AnyResponse
+from rich import print
 
-# from functools import cache
+BASE_URL = "https://gogoanime.llc/"
 
-BASE_URL = "https://www2.gogoanimes.fi"
+session = CachedSession("gogoanime_cache", expire_after=1 * 24 * 60 * 60)
 
 
-def get_js_render(url: str) -> None:
-    with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(headless=True)
-        context = browser.new_context()
-        page = context.new_page()
-        page.goto(url)
-        time.sleep(5)
-        # page.wait_for_selector(".dowload a", timeout=10)
-        content = page.content()
-        context.close()
-        browser.close()
-        return content
+def get_request_cache(url: str) -> AnyResponse:
+    resp = session.get(url)
+    print(f"From Cache : {resp.from_cache}")
+    return resp
+
+
+def get_request(url: str) -> httpx.Response:
+    with httpx.Client() as client:
+        return client.get(url)
 
 
 def html_parser(html: str) -> HTMLParser:
     return HTMLParser(html)
 
 
-def get_download_links(anime_id: str, episode_no: int) -> str:
-    response = httpx.get(f"{BASE_URL}/{anime_id}-episode-{episode_no}")
-    parser = html_parser(response.content)
-    download_page_url = parser.css_first(".dowloads a").attributes["href"]
-    print(download_page_url)
-    html_content = get_js_render(download_page_url)
-    parser = html_parser(html_content)
-    data = []
-    for a in parser.css(".dowload a"):
-        name = a.text().strip().replace("\n", "")
-        name = " ".join(list(name.split()))
-        data.append({"name": name, "link": a.attributes["href"]})
-    return data
-
-
-def search(query: str) -> list[dict]:  # sourcery skip: avoid-builtin-shadow
-    response = httpx.get(f"{BASE_URL}/search.html?keyword={query}")
+def search(query: str) -> list[dict]:
+    response = get_request(f"{BASE_URL}/search.html?keyword={query}")
     parser = html_parser(response.content)
 
     anime_list = []
@@ -57,19 +37,19 @@ def search(query: str) -> list[dict]:  # sourcery skip: avoid-builtin-shadow
     for element in parser.css("div.last_episodes ul.items li"):
         name = element.css_first("p a").attributes["title"]
         img = element.css_first("div a img").attributes["src"]
-        id = element.css_first("div a").attributes["href"].split("/")[-1]
+        id_ = element.css_first("div a").attributes["href"].split("/")[-1]
         anime = {
             "total_page": total_page,
             "name": name,
             "img_url": img,
-            "id": id,
+            "id": id_,
         }
         anime_list.append(anime)
     return anime_list
 
 
 def get_anime(anime_id: str) -> dict:
-    response = httpx.get(f"{BASE_URL}/category/{anime_id}")
+    response = get_request(f"{BASE_URL}/category/{anime_id}")
     parser = html_parser(response.content)
     img_url = parser.css_first(".anime_info_body_bg img").attributes["src"]
     about = parser.css_first(".anime_info_body_bg p:nth-of-type(3)").text()
@@ -81,28 +61,35 @@ def get_anime(anime_id: str) -> dict:
     return {"name": name, "img": img_url, "about": about, "episodes": episodes}
 
 
-def new_season(page_no: int) -> list[dict]:  # sourcery skip: avoid-builtin-shadow
+def new_season(page_no: int) -> list[dict]:
     anime_list = []
-    response = httpx.get(f"{BASE_URL}/new-season.html?page={page_no}")
+    response = get_request(f"{BASE_URL}/new-season.html?page={page_no}")
     parser = html_parser(response.content)
 
     for element in parser.css("div.main_body div.last_episodes ul.items li"):
         name = element.css_first("p a").text()
         img = element.css_first("div a img").attributes["src"]
-        id = element.css_first("div a").attributes["href"].split("/")[-1]
-        anime = {"name": name, "img": img, "id": id}
+        id_ = element.css_first("div a").attributes["href"].split("/")[-1]
+        anime = {"name": name, "img": img, "id": id_}
         anime_list.append(anime)
     return anime_list
 
 
-def get_streaming_link(anime_id: str, episode_no: int) -> str:
-    response = httpx.get(f"{BASE_URL}/{anime_id}-episode-{episode_no}")
+def get_streaming_links(anime_id: str, episode_no: int) -> str:
+    response = get_request_cache(f"{BASE_URL}/{anime_id}-episode-{episode_no}")
+
     parser = html_parser(response.content)
-    return f'https:{parser.css_first(".play-video > iframe").attributes["src"]}'
+    servers = parser.css(".anime_muti_link > ul > li")[1:]
+    data = []
+    for server in servers:
+        server_name = server.attributes["class"]
+        stream_url = server.css_first("a").attributes["data-video"]
+        data.append({server_name: stream_url})
+    return data
 
 
 def home(page: int):
-    response = httpx.get(
+    response = get_request(
         f"https://ajax.gogo-load.com/ajax/page-recent-release.html?page={page}"
     )
     parser = html_parser(response.content)
