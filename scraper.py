@@ -4,7 +4,8 @@ from contextlib import suppress
 from requests_cache import CachedSession, AnyResponse
 from rich import print
 
-BASE_URL = "https://gogoanime.llc/"
+BASE_URL = "https://www3.gogoanimes.fi/"
+
 
 session = CachedSession("gogoanime_cache", expire_after=1 * 24 * 60 * 60)
 
@@ -80,11 +81,14 @@ def get_streaming_links(anime_id: str, episode_no: int) -> str:
 
     parser = html_parser(response.content)
     servers = parser.css(".anime_muti_link > ul > li")[1:]
-    data = []
+    data = {}
     for server in servers:
         server_name = server.attributes["class"]
         stream_url = server.css_first("a").attributes["data-video"]
-        data.append({server_name: stream_url})
+        print(server_name)
+        print(stream_url)
+        data[server_name] = stream_url
+    data = dict(sorted(data.items(), key=lambda x: x[1]))
     return data
 
 

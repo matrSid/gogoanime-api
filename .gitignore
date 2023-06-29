@@ -1,0 +1,44 @@
+# Ignore VSCode specific files and directories
+.vscode/
+.settings/
+*.code-workspace
+
+# 
+*.sqlite
+# Ignore user-specific settings and preferences
+.settings.json
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore Python virtual environment files
+venv/
+.env/
+
+# Ignore Node.js dependencies
+node_modules/
+
+# Ignore compiled files and build output
+dist/
+build/
+out/
+bin/
+*.exe
+*.dll
+*.class
+*.o
+
+# Ignore macOS specific files
+.DS_Store
+
+# Ignore temporary files
+*.tmp
+*.log
+*.swp
+*~
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+# Ignore Python bytecode cache
+__pycache__/
