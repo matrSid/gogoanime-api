@@ -1,33 +1,27 @@
-import httpx
+from typing import Dict, List
 from selectolax.parser import HTMLParser
 from contextlib import suppress
-from requests_cache import CachedSession, AnyResponse
 from rich import print
+import aiohttp
 
 BASE_URL = "https://www3.gogoanimes.fi/"
 
 
-session = CachedSession("gogoanime_cache", expire_after=1 * 24 * 60 * 60)
-
-
-def get_request_cache(url: str) -> AnyResponse:
-    resp = session.get(url)
-    print(f"From Cache : {resp.from_cache}")
-    return resp
-
-
-def get_request(url: str) -> httpx.Response:
-    with httpx.Client() as client:
-        return client.get(url)
+async def get_request(url: str):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            print("Status:", response.status)
+            html = await response.text()
+            return html
 
 
 def html_parser(html: str) -> HTMLParser:
     return HTMLParser(html)
 
 
-def search(query: str) -> list[dict]:
-    response = get_request(f"{BASE_URL}/search.html?keyword={query}")
-    parser = html_parser(response.content)
+async def search(query: str) -> List[Dict[str, str]]:
+    html = await get_request(f"{BASE_URL}/search.html?keyword={query}")
+    parser = html_parser(html)
 
     anime_list = []
     total_page = 1
@@ -49,9 +43,9 @@ def search(query: str) -> list[dict]:
     return anime_list
 
 
-def get_anime(anime_id: str) -> dict:
-    response = get_request(f"{BASE_URL}/category/{anime_id}")
-    parser = html_parser(response.content)
+async def get_anime(anime_id: str) -> Dict[str, str]:
+    html = await get_request(f"{BASE_URL}/category/{anime_id}")
+    parser = html_parser(html)
     img_url = parser.css_first(".anime_info_body_bg img").attributes["src"]
     about = parser.css_first(".anime_info_body_bg p:nth-of-type(3)").text()
     name = parser.css_first("div.anime_info_body_bg h1").text()
@@ -62,10 +56,10 @@ def get_anime(anime_id: str) -> dict:
     return {"name": name, "img": img_url, "about": about, "episodes": episodes}
 
 
-def new_season(page_no: int) -> list[dict]:
+async def new_season(page_no: int) -> List[Dict[str, str]]:
     anime_list = []
-    response = get_request(f"{BASE_URL}/new-season.html?page={page_no}")
-    parser = html_parser(response.content)
+    html = await get_request(f"{BASE_URL}/new-season.html?page={page_no}")
+    parser = html_parser(html)
 
     for element in parser.css("div.main_body div.last_episodes ul.items li"):
         name = element.css_first("p a").text()
@@ -76,10 +70,10 @@ def new_season(page_no: int) -> list[dict]:
     return anime_list
 
 
-def get_streaming_links(anime_id: str, episode_no: int) -> str:
-    response = get_request_cache(f"{BASE_URL}/{anime_id}-episode-{episode_no}")
+async def get_streaming_links(anime_id: str, episode_no: int) -> str:
+    html = await get_request(f"{BASE_URL}/{anime_id}-episode-{episode_no}")
 
-    parser = html_parser(response.content)
+    parser = html_parser(html)
     servers = parser.css(".anime_muti_link > ul > li")[1:]
     data = {}
     for server in servers:
@@ -92,18 +86,18 @@ def get_streaming_links(anime_id: str, episode_no: int) -> str:
     return data
 
 
-def home(page: int):
-    response = get_request(
+async def home(page: int) -> List[Dict[str, str]]:
+    html = await get_request(
         f"https://ajax.gogo-load.com/ajax/page-recent-release.html?page={page}"
     )
-    parser = html_parser(response.content)
-    anime = []
+    parser = html_parser(html)
+    animes: List[Dict[str, str]] = []
     for li in parser.css("ul.items li"):
-        img = li.css_first("div.img img").attributes["src"]
-        episode_id = li.css_first("div.img a").attributes["href"][1:]
-        name = li.css_first("div.img a").attributes["title"]
-        episode_text = li.css_first("p.episode").text()
-        anime.append(
+        img: str = li.css_first("div.img img").attributes["src"]
+        episode_id: str = li.css_first("div.img a").attributes["href"][1:]
+        name: str = li.css_first("div.img a").attributes["title"]
+        episode_text: str = li.css_first("p.episode").text()
+        animes.append(
             {
                 "name": name,
                 "episode_id": episode_id,
@@ -111,4 +105,4 @@ def home(page: int):
                 "img": img,
             }
         )
-    return anime
+    return animes

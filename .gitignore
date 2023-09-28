@@ -15,7 +15,7 @@
 # Ignore Python virtual environment files
 venv/
 .env/
-
+env
 # Ignore Node.js dependencies
 node_modules/
 
