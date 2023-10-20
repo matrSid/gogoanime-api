@@ -32,9 +32,6 @@ The web scraper can be used by making HTTP requests to the various endpoints/rou
 pip install -r requirements.txt
 ```
 
-```bash
-playwright install chromium
-```
 
 ## Usage
 
