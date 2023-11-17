@@ -11,8 +11,7 @@ async def get_request(url: str):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             print("Status:", response.status)
-            html = await response.text()
-            return html
+            return await response.text()
 
 
 def html_parser(html: str) -> HTMLParser:
