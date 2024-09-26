@@ -1,10 +1,10 @@
-from typing import Dict, List
+from typing import Dict, Final, List
 from selectolax.parser import HTMLParser
 from contextlib import suppress
 from rich import print
 import aiohttp
 
-BASE_URL = "https://www3.gogoanimes.fi/"
+BASE_URL: Final[str] = "https://www3.gogoanimes.fi/"
 
 
 async def get_request(url: str):
