@@ -2,3 +2,4 @@ aiohttp==3.10.6
 fastapi==0.115.0
 rich==13.8.1
 selectolax==0.3.21
+uvicorn==0.30.6
