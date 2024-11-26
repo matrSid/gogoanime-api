@@ -52,7 +52,7 @@ async def get_anime(anime_id: str) -> Dict[str, str]:
     genres = genre_string.split("Genre: ")[1].strip().split(",")
     released_text = parser.css_first("div.anime_info_body_bg p:nth-of-type(5)").text()
     released = released_text.split(":")[-1].strip()
-    status = parser.css_first("div.anime_info_body_bg p:nth-of-type(6)").text()
+    status = parser.css_first("div.anime_info_body_bg p:nth-of-type(6) a").text()
     last_ep = int(
         parser.css_first("#episode_page li:last-child a").attributes["ep_end"]
     )
