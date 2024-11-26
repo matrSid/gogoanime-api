@@ -48,12 +48,13 @@ async def get_anime(anime_id: str) -> Dict[str, str]:
     img_url = parser.css_first(".anime_info_body_bg img").attributes["src"]
     about = parser.css_first(".anime_info_body_bg p:nth-of-type(3)").text()
     name = parser.css_first("div.anime_info_body_bg h1").text()
-    genre = parser.css_first("div.anime_info_body_bg p.type").text()
+    genre = parser.css_first("div.anime_info_body_bg p:nth-of-type(4)").text()
+    released = parser.css_first("div.anime_info_body_bg p:nth-of-type(5)").text()
     last_ep = int(
         parser.css_first("#episode_page li:last-child a").attributes["ep_end"]
     )
     episodes = list(range(1, last_ep + 1))
-    return {"name": name, "img": img_url, "about": about, "episodes": episodes}
+    return {"name": name, "img": img_url, "about": about, "episodes": episodes, "genre": genre, "released": released}
 
 
 async def new_season(page_no: int) -> List[Dict[str, str]]:
