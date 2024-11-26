@@ -48,6 +48,7 @@ async def get_anime(anime_id: str) -> Dict[str, str]:
     img_url = parser.css_first(".anime_info_body_bg img").attributes["src"]
     about = parser.css_first(".anime_info_body_bg p:nth-of-type(3)").text()
     name = parser.css_first("div.anime_info_body_bg h1").text()
+    genre = parser.css_first("div.anime_info_body_bg p.type").text()
     last_ep = int(
         parser.css_first("#episode_page li:last-child a").attributes["ep_end"]
     )
