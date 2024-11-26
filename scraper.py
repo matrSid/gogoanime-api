@@ -48,8 +48,11 @@ async def get_anime(anime_id: str) -> Dict[str, str]:
     img_url = parser.css_first(".anime_info_body_bg img").attributes["src"]
     about = parser.css_first(".anime_info_body_bg div:nth-of-type(1)").text()
     name = parser.css_first("div.anime_info_body_bg h1").text()
-    genre_elements = parser.css("div.anime_info_body_bg p:nth-child(4) a::text").getall()
-    genre = ", ".join(genre_elements)
+
+    genre_section = parser.css_first("p:contains('Genre:')")
+    genre_links = genre_section.css("a")
+    genre = ", ".join([link.text for link in genre_links])
+
     released_text = parser.css_first("div.anime_info_body_bg p:nth-of-type(5)").text()
     released = released_text.split(":")[-1].strip()
     status = parser.css_first("div.anime_info_body_bg p:nth-of-type(6)").text()
