@@ -49,7 +49,10 @@ async def get_anime(anime_id: str) -> Dict[str, str]:
     about = parser.css_first(".anime_info_body_bg div.description").text()
     name = parser.css_first("div.anime_info_body_bg h1").text()
     genre_string = parser.css_first("div.anime_info_body_bg p:nth-of-type(4)").text()
-    genres = genre_string.split("Genre: ")[1].strip().split(",")
+    try:
+        genres = genre_string.split("Genre: ")[1].strip().split(",")
+    except (IndexError, AttributeError):
+        genres = []
     released_text = parser.css_first("div.anime_info_body_bg p:nth-of-type(5)").text()
     released = released_text.split(":")[-1].strip()
     status = parser.css_first("div.anime_info_body_bg p:nth-of-type(6) a").text()
